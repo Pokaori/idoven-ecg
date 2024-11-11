@@ -2,11 +2,32 @@
 
 A FastAPI-based asynchronous microservice for processing and analyzing electrocardiograms (ECGs). This service provides secure endpoints for uploading ECGs and retrieving analytical insights about the signals, leveraging Python's async/await capabilities for efficient I/O operations.
 
+## Getting Started
+
+### Prerequisites
+
+- Docker and Docker Compose installed
+- Git
+
+### Local Development Setup
+
+1. Clone the repository  `git clone <repository-url>`
+2. Create `.docker.env` file. Copy `.docker.env.example`.
+3. Run `./bin/server.sh`
+
+## Testing
+
+Tests are written using Pytest with pytest-asyncio for handling asynchronous test cases. The test suite includes both unit tests for data validation and integration tests for API endpoints.
+
+To run tests:
+`./bin/tests.sh`
+
+
 ## Features
 
 - **Security**: 
   - JWT-based authentication with access and refresh tokens
-  - Password hashing using md5-crypt with salt
+  - Password hashing using sha256 with salt
   - Input validation and sanitization using Pydantic models
 
 - **Scalable Architecture**: 
@@ -36,25 +57,6 @@ Background Processing:
 - **Task Queue**: Celery with RabbitMQ as message broker
 
 
-## Getting Started
-
-### Prerequisites
-
-- Docker and Docker Compose installed
-- Git
-
-### Local Development Setup
-
-1. Clone the repository  `git clone <repository-url>`
-2. Create `.docker.env` file. Copy `.docker.env.example`.
-3. Run `docker compose up --build`
-
-## Testing
-
-Tests are written using Pytest with pytest-asyncio for handling asynchronous test cases. The test suite includes both unit tests for data validation and integration tests for API endpoints.
-
-To run tests:
-`docker compose -f docker-compose.test.yml up --build`
 
 ## API Endpoints
 
@@ -71,7 +73,6 @@ To run tests:
 
 
 ## Future Improvements
-
 Testing Enhancements:
 
 - Add more test cases for data validation and error handling
@@ -96,5 +97,12 @@ Admin Functionality:
 
 - Add admin user role and permissions system
 - Add API endpoints for admin to register new users
+
+Environment Configuration:
+
+- Add development, staging and production environment configurations
+- Configure environment-specific settings for databases, caching, etc.
+- Set up environment variable management for different deployments
+
 
 

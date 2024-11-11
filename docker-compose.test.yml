@@ -1,14 +1,16 @@
 services:
   test_db:
     image: postgres:latest
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${TEST_POSTGRES_DB:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     env_file:
       - .docker.env
+    environment:
+      - POSTGRES_USER=${TEST_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${TEST_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${TEST_POSTGRES_DB}
     ports:
-      - "5433:5432"
+      - "${TEST_POSTGRES_PORT_OUT:-5432}:5432"
 
   test_runner:
     build:
@@ -21,3 +23,5 @@ services:
     volumes:
       - .:/app
 
+volumes:
+  postgres_data:

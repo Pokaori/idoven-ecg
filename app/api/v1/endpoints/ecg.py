@@ -21,9 +21,7 @@ async def create_ecg(
 ) -> ECGOutLeads:
     """Create new ECG."""
     ecg = await ecg_service.create(current_user.id, ecg)
-    print("ehh")
     task = analyze_ecg_task(ecg.id,current_user.id)
-    print("after")
     ecg = await ecg_service.update_task_id(ecg.id, task.id, current_user.id)
     return ecg
 

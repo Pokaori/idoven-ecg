@@ -37,7 +37,15 @@ class Settings(BaseSettings):
     # Test Database settings
     TEST_POSTGRES_SERVER: str = "localhost"
     TEST_POSTGRES_PORT: str = "5433"
-    TEST_POSTGRES_DB: str = "test_db"
+    TEST_POSTGRES_DB: str = "postgres"
+    TEST_POSTGRES_PASSWORD: str = "postgres"
+    TEST_POSTGRES_USER: str = "postgres"
+
+    # RabbitMQ settings
+    RABBITMQ_HOST: str = "rabbitmq"
+    RABBITMQ_PORT: str = "5672"
+    RABBITMQ_USER: str = "guest"
+    RABBITMQ_PASSWORD: str = "guest"
 
     SQLALCHEMY_DATABASE_URI: PostgresDsn | None = None
     TEST_SQLALCHEMY_DATABASE_URI: PostgresDsn | None = None
@@ -52,7 +60,7 @@ class Settings(BaseSettings):
             password=values.data.get("POSTGRES_PASSWORD"),
             host=values.data.get("POSTGRES_SERVER"),
             port=int(values.data.get("POSTGRES_PORT", 5432)),
-            path=values.data.get('POSTGRES_DB') or '',
+            path=values.data.get("POSTGRES_DB") or "",
         )
 
     @field_validator("TEST_SQLALCHEMY_DATABASE_URI", mode="before")
@@ -62,10 +70,10 @@ class Settings(BaseSettings):
             return v
         return PostgresDsn.build(
             scheme="postgresql+asyncpg",
-            username=values.data.get("POSTGRES_USER"),
-            password=values.data.get("POSTGRES_PASSWORD"),
+            username=values.data.get("TEST_POSTGRES_USER"),
+            password=values.data.get("TEST_POSTGRES_PASSWORD"),
             host=values.data.get("TEST_POSTGRES_SERVER"),
-            port=int(values.data.get("TEST_POSTGRES_PORT", 5433)),
+            port=int(values.data.get("TEST_POSTGRES_PORT", 5432)),
             path=values.data.get("TEST_POSTGRES_DB") or "",
         )
 
@@ -73,17 +81,27 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str | None = None
     CELERY_RESULT_BACKEND: str | None = None
 
+
     @field_validator("CELERY_BROKER_URL", mode="before")
     def assemble_broker_url(cls, v: str | None, values: dict[str, Any]) -> str | None:
         if v:
             return v
-        return None
+        user = values.data.get("RABBITMQ_USER", "guest")
+        password = values.data.get("RABBITMQ_PASSWORD", "guest")
+        host = values.data.get("RABBITMQ_HOST", "rabbitmq")
+        port = values.data.get("RABBITMQ_PORT", 5672)
+        return f"amqp://{user}:{password}@{host}:{port}//"
 
     @field_validator("CELERY_RESULT_BACKEND", mode="before")
     def assemble_backend_url(cls, v: str | None, values: dict[str, Any]) -> str | None:
         if v:
             return v
-        return None
+        user = values.data.get("POSTGRES_USER", "postgres")
+        password = values.data.get("POSTGRES_PASSWORD", "postgres")
+        server = values.data.get("POSTGRES_SERVER", "db")
+        port = values.data.get("POSTGRES_PORT", 5432)
+        db = values.data.get("POSTGRES_DB", "postgres")
+        return f"db+postgresql://{user}:{password}@{server}:{port}/{db}"
 
     model_config = SettingsConfigDict(env_file=(".env", ".docker.env"), extra="ignore")
 

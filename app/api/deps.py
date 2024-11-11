@@ -58,7 +58,6 @@ async def get_refresh_user(
     authorization: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     user_service: Annotated[UserService, Depends()],
 ) -> UserOut:
-    print(authorization.credentials)
     return await _get_token_user(
         authorization.credentials, settings.RERFRESH_SECRET_KEY, user_service
     )

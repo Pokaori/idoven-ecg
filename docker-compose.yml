@@ -22,7 +22,7 @@ services:
     env_file:
       - .docker.env
     ports:
-      - "5434:5432"
+      - "${POSTGRES_PORT_OUT:-5432}:5432"
 
   rabbitmq:
     image: rabbitmq:latest
@@ -40,7 +40,7 @@ services:
     build: .
     command: celery -A app.celery.celery_app worker -l info
     env_file:
-      - .env
+      - .docker.env
     depends_on:
       - db
       - rabbitmq

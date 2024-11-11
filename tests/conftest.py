@@ -86,17 +86,17 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
         yield client
 
 
-# Initialize the database
-# @pytest_asyncio.fixture(scope="session", autouse=True)
-# async def setup_database():
-#     app.dependency_overrides[get_db] = override_db
-#     """Create test database tables"""
-#     async with engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.drop_all)
-#         await conn.run_sync(Base.metadata.create_all)
-#     yield
-#     async with engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.drop_all)
+#Initialize the database
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def setup_database():
+    app.dependency_overrides[get_db] = override_db
+    """Create test database tables"""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest_asyncio.fixture
@@ -112,7 +112,6 @@ async def test_user(db_session: AsyncSession):
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
-    print(user)
     return user
 
 

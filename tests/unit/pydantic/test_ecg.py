@@ -59,7 +59,6 @@ def test_invalid_ecg_data(test_data: dict, expected_error: str):
     """Test that invalid ECG data raises appropriate validation errors"""
     with pytest.raises(ValidationError) as exc_info:
          ECGCreate(**test_data)
-    print("hello", exc_info.value.errors()[0]['msg'])
     assert expected_error in exc_info.value.errors()[0]['msg']
 
 def test_lead_data_validation():
