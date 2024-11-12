@@ -23,13 +23,14 @@ Tests are written using Pytest with pytest-asyncio for handling asynchronous tes
 To run tests:
 `./bin/tests.sh`
 
-
 ## Features
 
 - **Security**: 
   - JWT-based authentication with access and refresh tokens
   - Password hashing using sha256 with salt
   - Input validation and sanitization using Pydantic models
+  - Admin-only user registration to control access
+  - Role-based permissions where only non-admin users can create and view ECGs
 
 - **Scalable Architecture**: 
   - API versioning (/api/v1/) allows seamless updates without breaking existing clients
@@ -69,8 +70,8 @@ Background Processing:
 
 ### ECG Operations
 
-- `POST /api/v1/ecg/` - Upload ECG data
-- `GET /api/v1/ecg/{ecg_id}` - Retrieve ECG analysis results
+- `POST /api/v1/ecg/` - Upload ECG data (Regular users only)
+- `GET /api/v1/ecg/{ecg_id}` - Retrieve ECG analysis results (Regular users only)
 
 
 ## Future Improvements
@@ -93,11 +94,6 @@ Pre-commit:
 GitHub CI/CD:
 
 - Set up GitHub Actions workflow for automated testing
-
-Admin Functionality:
-
-- Add admin user role and permissions system
-- Add API endpoints for admin to register new users
 
 Environment Configuration:
 
