@@ -16,7 +16,7 @@ router = APIRouter()
 async def create_ecg(
     *,
     ecg: ECGCreate,
-    current_user: Annotated[User, Depends(deps.get_current_user)],
+    current_user: Annotated[User, Depends(deps.get_common_user)],
     ecg_service: Annotated[ECGService, Depends()],
 ) -> ECGOutLeads:
     """Create new ECG."""
@@ -29,7 +29,7 @@ async def create_ecg(
 @router.get("/{ecg_id}", response_model=ECGTaskOut)
 async def get_ecg(
     ecg_id: UUID,
-    current_user: Annotated[User, Depends(deps.get_current_user)],
+    current_user: Annotated[User, Depends(deps.get_common_user)],
     ecg_service: Annotated[ECGService, Depends()],
 ) -> ECGTaskOut:
     """

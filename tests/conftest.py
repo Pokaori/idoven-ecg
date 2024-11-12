@@ -123,3 +123,16 @@ async def authenticated_user(test_user: User) -> tuple[User, str, str]:
     refresh_token = create_refresh_token(test_user.email)
 
     return test_user, access_token, refresh_token
+
+@pytest_asyncio.fixture
+async def authenticated_admin_user(db_session: AsyncSession,test_user: User) -> tuple[User, str, str]:
+    """Create authenticated user with tokens"""
+    # Create access and refresh tokens
+    test_user.is_admin = True
+    await db_session.commit()
+    await db_session.refresh(test_user)
+
+    access_token = create_access_token(test_user.email)
+    refresh_token = create_refresh_token(test_user.email)
+
+    return test_user, access_token, refresh_token

@@ -49,3 +49,21 @@ async def test_invalid_ecg_data(
     headers = {"Authorization": f"Bearer {access_token}"}
     response = await client.post("/api/v1/ecg", json=test_data, headers=headers)
     assert response.status_code == expected_status
+
+@pytest.mark.asyncio
+async def test_admin_cannot_create_ecg(client: AsyncClient, authenticated_admin_user: tuple[User, str, str]):
+    """Test that admin users cannot create ECGs"""
+    _, access_token, _ = authenticated_admin_user
+    
+    test_data = {
+        "leads": [
+            {"name": "I", "signal": [1, 2, 3, 4, 5], "sampling_rate": 250},
+            {"name": "II", "signal": [1, 2, 3, 4, 5], "sampling_rate": 250},
+        ],
+        "date": date.today().isoformat(),
+    }
+    
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = await client.post("/api/v1/ecg", json=test_data, headers=headers)
+    assert response.status_code == 403
+    assert "Not enough permissions" in response.json()["detail"]

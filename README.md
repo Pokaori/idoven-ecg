@@ -13,7 +13,8 @@ A FastAPI-based asynchronous microservice for processing and analyzing electroca
 
 1. Clone the repository  `git clone <repository-url>`
 2. Create `.docker.env` file. Copy `.docker.env.example`.
-3. Run `./bin/server.sh`
+3. Run `bin/server.sh`
+4. Create admin user `bin/create_admin.sh  <email> <password>`
 
 ## Testing
 

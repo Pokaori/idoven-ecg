@@ -18,13 +18,20 @@ class UserService(BaseService):
         result = await self.db.execute(select(User).where(User.email == email))
         return result.scalar_one_or_none()
 
-    async def create(self, user_in: UserCreate) -> User:
+    async def _create(self, user_in: UserCreate, is_admin: bool = False) -> User:
         user = User(
             email=user_in.email,
             hashed_password=get_password_hash(user_in.password),
             is_active=True,
+            is_admin=is_admin,
         )
         self.db.add(user)
         await self.commit()
         await self.refresh(user)
         return user
+
+    async def create(self, user_in: UserCreate) -> User:
+        return await self._create(user_in)
+
+    async def create_admin(self, user_in: UserCreate) -> User:
+        return await self._create(user_in, is_admin=True)

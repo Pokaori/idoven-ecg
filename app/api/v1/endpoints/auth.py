@@ -4,7 +4,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.api.deps import get_refresh_user
+from app.api.deps import get_refresh_user, get_current_admin
 from app.core.security import create_access_token, create_refresh_token
 from app.schemas.token import Token, TokenAccess
 from app.schemas.user import UserCreate, UserOut
@@ -35,7 +35,9 @@ async def login(
 
 @router.post("/register", response_model=UserOut)
 async def register(
-    user_create: UserCreate, user_service: Annotated[UserService, Depends()]
+    user_create: UserCreate,
+    user_service: Annotated[UserService, Depends()],
+    current_admin: Annotated[UserOut, Depends(get_current_admin)],
 ):
     """
     Create new user (admin only).

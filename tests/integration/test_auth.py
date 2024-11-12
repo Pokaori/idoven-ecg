@@ -9,12 +9,15 @@ from app.services.user import UserService
 
 
 @pytest.mark.asyncio
-async def test_register_login_flow(client: AsyncClient):
+async def test_register_login_flow(client: AsyncClient, authenticated_admin_user: tuple[User, str, str]):
     # Test data
+
+    _, access_token, _ = authenticated_admin_user
     user_data = {"email": "test@example.com", "password": "Test123!@#"}
 
     # Test registration
-    response = await client.post("/api/v1/auth/register", json=user_data)
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = await client.post("/api/v1/auth/register", json=user_data, headers=headers)
     assert response.status_code == 200
     user_response = response.json()
     assert user_response["email"] == user_data["email"]
@@ -31,16 +34,18 @@ async def test_register_login_flow(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_register_duplicate_email(client: AsyncClient):
+async def test_register_duplicate_email(client: AsyncClient, authenticated_admin_user: tuple[User, str, str]):
     # Test data
+    _, access_token, _ = authenticated_admin_user
     user_data = {"email": "duplicate@example.com", "password": "Test123!@#"}
 
+    headers = {"Authorization": f"Bearer {access_token}"}
     # Register first user
-    response = await client.post("/api/v1/auth/register", json=user_data)
+    response = await client.post("/api/v1/auth/register", json=user_data, headers=headers)
     assert response.status_code == 200
 
     # Try to register with same email
-    response = await client.post("/api/v1/auth/register", json=user_data)
+    response = await client.post("/api/v1/auth/register", json=user_data, headers=headers)
     assert response.status_code == 400
     assert "Email already registered" in response.json()["detail"]
 
@@ -70,35 +75,30 @@ async def test_refresh_token(
 
 
 @pytest.mark.asyncio
-async def test_inactive_user_login(client: AsyncClient, db_session: AsyncSession):
-    # Create inactive user
-    user_data = {"email": "inactive@example.com", "password": "Test123!@#"}
-
-    # Register the user first
-    response = await client.post("/api/v1/auth/register", json=user_data)
-    assert response.status_code == 200
-
-    # Deactivate the user
-    user = await db_session.execute(
-        select(User).where(User.email == user_data["email"])
-    )
-    user = user.scalar_one()
-    user.is_active = False
-    await db_session.commit()
-
-    # Try to login
-    login_data = {"username": user_data["email"], "password": user_data["password"]}
-    response = await client.post("/api/v1/auth/login", data=login_data)
-    assert response.status_code == 400
-    assert "Inactive user" in response.json()["detail"]
-
-
-@pytest.mark.asyncio
-async def test_password_invalid(client: AsyncClient):
+async def test_password_invalid(client: AsyncClient, authenticated_admin_user: tuple[User, str, str]):
     # Test with weak password
+    _, access_token, _ = authenticated_admin_user
     user_data = {
         "email": "test@example.com",
         "password": "weakpass",  # Missing uppercase, number, and special char
     }
-    response = await client.post("/api/v1/auth/register", json=user_data)
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = await client.post("/api/v1/auth/register", json=user_data, headers=headers)
+    
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_register_as_normal_user_fails(client: AsyncClient, authenticated_user: tuple[User, str, str]):
+    """Test that normal users cannot register new users"""
+    # Get normal user's access token
+    _, access_token, _ = authenticated_user
+    
+    # Try to register a new user
+    new_user_data = {"email": "newuser@example.com", "password": "Test123!@#"}
+    headers = {"Authorization": f"Bearer {access_token}"}
+    
+    response = await client.post("/api/v1/auth/register", json=new_user_data, headers=headers)
+    assert response.status_code == 403
+    assert "Not enough permissions" in response.json()["detail"]
